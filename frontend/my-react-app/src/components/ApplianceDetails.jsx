@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ApplianceDetails = () => {
     const [applianceData, setApplianceData] = useState({});
+    const [invoiceImage, setInvoiceImage] = useState(null); // State to store invoice image blob
     const navigate = useNavigate(); // Initialize useNavigate hook
-    const location = useLocation();
     const selectedApplianceId = localStorage.getItem('selectedApplianceId');
     const u_id = localStorage.getItem('userId');
     const password = localStorage.getItem('password');
-    console.log(applianceData);
 
     useEffect(() => {
         // Fetch appliance details when the component mounts
@@ -27,7 +26,12 @@ const ApplianceDetails = () => {
                 }
             });
             setApplianceData(response.data);
-            console.log(response.data.appliance.a_name);
+            console.log(response.data)
+            
+            // Fetch invoice image if available
+            if (response.data.invoiceImage) {
+                setInvoiceImage(URL.createObjectURL(new Blob([response.data.invoiceImage])));
+            }
         } catch (error) {
             console.error('Error fetching appliance details:', error);
         }
@@ -49,8 +53,8 @@ const ApplianceDetails = () => {
             {/* Top Bar */}
             <header className="bg-gray-800 text-white py-4 px-6 flex justify-between items-center">
                 <div>
-                    <h1 className="text-lg font-semibold">{applianceData.appliance.a_name} Details</h1>
-                    <p className="text-sm">Appliance ID: {applianceData.appliance.a_id}</p>
+                    <h1 className="text-lg font-semibold">{applianceData.appliance?.a_name || ''} Details</h1>
+                    <p className="text-sm">Appliance ID: {applianceData.appliance?.a_id || ''}</p>
                 </div>
                 <div>
                     <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-8 rounded-md m-4" onClick={handleLogout}>
@@ -62,9 +66,9 @@ const ApplianceDetails = () => {
             <main className="p-6">
                 <div>
                     <h2 className="text-xl font-semibold mb-4">Appliance Details</h2>
-                    <p>Purchase Date: {new Date(applianceData.appliance.purchase_date).toLocaleDateString()}</p>
-                    <p>Cost: Rs {applianceData.appliance.cost}</p>
-                    <img src={`data:image/jpeg;base64,${applianceData.image.invoice_image_base64}`} alt="Invoice" />
+                    <p>Purchase Date: {applianceData.appliance?.purchase_date ? new Date(applianceData.appliance.purchase_date).toLocaleDateString() : ''}</p>
+                    <p>Cost: Rs {applianceData.appliance?.cost || ''}</p>
+                    {invoiceImage && <img src={invoiceImage} alt="Invoice" />} {/* Render invoice image if available */}
                     {/* Add more details here as needed */}
                 </div>
             </main>

@@ -168,24 +168,23 @@ app.get('/groups', async (req, res) => {
 const VerifyAdmin = async (u_id, password,g_id) => {
     try{
         const isValidUser = await verifyUser(u_id, password);
-        console.log(isValidUser,"groups")
+        // console.log(isValidUser,"groups")
         if (!isValidUser) {
             // If user is not verified, send an error response
-            return res.status(401).json({ error: 'Unauthorized' });
+            return false;
         }
         const connection = await pool.getConnection();
         const result = await connection.query('SELECT * FROM admin WHERE u_id = ? and g_id = ?', [u_id, g_id]);
         connection.release();
-        console.log(result.length);//this is just to check, afterwards comment it out
+        // console.log(result.length);//this is just to check, afterwards comment it out
 
         // if the user is the admin of the group then return true else false
         return result.length === 1;
     }catch(error){
-        console.error('Error checkin isAdmin', error);
+        console.error('Error checking isAdmin', error);
         throw error;
     }
 }
-
 
 
 // Route to fetch appliances
@@ -224,26 +223,55 @@ app.get('/appliances', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
 // server.js
+
+app.delete('/group-description',async (req, res) =>{
+    const {g_id,password,u_id} = req.query;
+
+    try{
+        const isAdmin = await VerifyAdmin(u_id,password,g_id)
+        console.log(isAdmin);
+        if(isAdmin){
+            res.status(200).json({ message: 'Cannot remove an admin' });
+        }else{
+           console.log("deleting user start"); 
+           const connection = await pool.getConnection();
+           const result = await connection.query('DELETE FROM user_group_membership WHERE u_id = ? AND g_id = ?',[u_id,g_id]);
+           connection.release();
+           res.status(200).json({message:'Removed successfully'})
+        }
+    }catch(error){
+        console.error("There was a problem deleting user",error);
+    }
+
+})
 
 // Route to fetch group description
 app.get('/group-description', async (req, res) => {
-    const { g_id } = req.query; // Retrieve group ID from query parameters
+    // console.log(req.query); done to check errors
+    const { g_id, u_id, password } = req.query; // Retrieve group ID from query parameters
 
     try {
         const connection = await pool.getConnection();
         // Fetch group details and count of members in the group
+        
+        //check if the user is a admin
+        const isAdmin = await VerifyAdmin(u_id,password,g_id);
+
         // Fetch users in the group
         const groupUsers = await connection.query('SELECT * FROM user WHERE u_id IN (SELECT u_id FROM user_group_membership WHERE g_id = ?)', [g_id]);
+
+        const g_name = await connection.query('SELECT g_name from u_group WHERE g_id = ?',[g_id]);
         connection.release();
         
         // Combine group details and users
         const groupData = {
             u_count:groupUsers.length,
-            users: groupUsers
+            users: groupUsers,
+            g_name:g_name[0].g_name,
+            isAdmin  
         };
-        console.log(groupData)
+        // console.log(groupData)
 
         res.json(groupData);
     } catch (error) {
@@ -251,8 +279,6 @@ app.get('/group-description', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
-// server.js
 
 // Route to fetch appliance details by ID
 app.get('/appliance-details', async (req, res) => {
@@ -270,19 +296,34 @@ app.get('/appliance-details', async (req, res) => {
         // Fetch appliance details from the database based on the ID
         const connection = await pool.getConnection();
         const [appliance] = await connection.query('SELECT * FROM appliance WHERE a_id = ?', [a_id]);
-        const [image] = await connection.query('SELECT *, CONVERT(invoice_image USING utf8) AS invoice_image_base64 FROM appliance WHERE a_id = ?', [a_id]);
-       // const service_history = await connection.query('')
+        
+        // Check if the appliance exists
+        if (!appliance) {
+            connection.release();
+            return res.status(404).json({ error: 'Appliance not found' });
+        }
+        
+        // Fetch document image blob for doc_id = d11 if it exists
+        let documentImage = null;
+        try {
+            const [docResult] = await connection.query('SELECT invoice_image FROM appliance WHERE a_id= ?', [a_id]);
+            if (docResult && docResult.length > 0) {
+                documentImage = docResult[0].document_image;
+            }
+        } catch (docError) {
+            console.error("Error fetching document image:", docError);
+            // If document image fetch fails, handle as required
+        }
+
         connection.release();
-        const aplData = {
-            appliance:appliance,
-            image:image
-        }
-        console.log(aplData);
-        if (appliance) {
-            res.json(aplData);
-        } else {
-            res.status(404).json({ error: 'Appliance not found' });
-        }
+
+        // Prepare response data
+        const responseData = {
+            appliance: appliance,
+            documentImage: documentImage
+        };
+
+        res.json(responseData);
     } catch (error) {
         console.error('Error fetching appliance details:', error);
         res.status(500).json({ error: 'Internal server error' });
