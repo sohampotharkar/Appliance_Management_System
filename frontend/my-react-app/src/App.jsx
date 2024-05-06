@@ -6,6 +6,7 @@ import Appliance from './components/Appliance';
 import "./App.css";
 import GroupDescription from './components/GroupDescription';
 import ApplianceDetails from './components/ApplianceDetails';
+import Addappliance from './components/Addappliance';
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                     <Route path="/appliance" element={<Appliance />} />
                     <Route path='/group-description' element={<GroupDescription />} />
                     <Route path='/appliance-details' element={<ApplianceDetails/>}/>
+                    <Route path='/add-appliance' element={<Addappliance/>}/>
                 </Routes>
             </div>
         </Router>

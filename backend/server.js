@@ -296,19 +296,20 @@ app.get('/appliance-details', async (req, res) => {
         // Fetch appliance details from the database based on the ID
         const connection = await pool.getConnection();
         const [appliance] = await connection.query('SELECT * FROM appliance WHERE a_id = ?', [a_id]);
-        
+        const service_history= await connection.query('SELECT * FROM service_history WHERE a_id = ?',[a_id]);
+        const [war_end_date] = await connection.query('CALL cal_warr_date(?,?)',[appliance.purchase_date,appliance.warranty_period])
+        console.log(war_end_date)
         // Check if the appliance exists
         if (!appliance) {
             connection.release();
             return res.status(404).json({ error: 'Appliance not found' });
         }
         
-        // Fetch document image blob for doc_id = d11 if it exists
-        let documentImage = null;
+        // Fetch document image blob for doc_id = d11 if it exist
+        let documentImage=appliance.invoice_image;
         try {
-            const [docResult] = await connection.query('SELECT invoice_image FROM appliance WHERE a_id= ?', [a_id]);
-            if (docResult && docResult.length > 0) {
-                documentImage = docResult[0].document_image;
+            if (documentImage.length > 0) {
+               console.log(documentImage);
             }
         } catch (docError) {
             console.error("Error fetching document image:", docError);
@@ -320,15 +321,21 @@ app.get('/appliance-details', async (req, res) => {
         // Prepare response data
         const responseData = {
             appliance: appliance,
-            documentImage: documentImage
+            documentImage: documentImage,
+            service_h:service_history,
+            war_end_date
         };
-
+        console.log(responseData);
         res.json(responseData);
     } catch (error) {
         console.error('Error fetching appliance details:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+// app,get('/add-appliance',async (req,res)=>{
+
+// })
 
 
 
