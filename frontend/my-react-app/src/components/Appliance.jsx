@@ -72,6 +72,21 @@ const Appliance = () => {
         }
     };
 
+    const handleYourAppliances = async () => {
+        try {
+            // Fetch admin's appliances from the backend
+            const response = await axios.get('http://localhost:5000/admin-appliances', {
+                params: { u_id: localStorage.getItem('userId'), password: localStorage.getItem('password'), g_id }
+            });
+            const adminAppliances = response.data;
+
+            // Navigate to the page to display admin's appliances and pass the data as state
+            navigate('/your-appliances', { state: { adminAppliances } });
+        } catch (error) {
+            console.error('Error fetching admin appliances:', error);
+        }
+    };
+
     const handleApplianceClick = (a_id) => {
         // Store the appliance ID in local storage
         localStorage.setItem('selectedApplianceId', a_id);
@@ -90,6 +105,9 @@ const Appliance = () => {
                 <div>
                     <button className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md mr-4" onClick={handleGroupDescription}>
                         Group Description
+                    </button>
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-8 rounded-md m-4" onClick={handleYourAppliances}>
+                        Your Appliances
                     </button>
                     <button className="bg-green-600 hover:bg-green-700 text-white py-2 px-8 rounded-md" onClick={() => navigate('/add-appliance')}>
                         Add Appliance

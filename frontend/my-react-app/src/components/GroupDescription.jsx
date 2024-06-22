@@ -77,6 +77,7 @@ const GroupDescription = () => {
                 console.error('Failed to remove user');
                 alert(response.data.message);
             }
+            navigate('/group-description');
         } catch (error) {
             console.error('Error:', error);
         }
@@ -98,7 +99,7 @@ const GroupDescription = () => {
                 </div>
                 <div>{
                         groupData.isAdmin &&                  
-                        <button className="bg-green-600 hover:bg-green-700 text-white py-2 px-8 rounded-md" onClick={() => navigate('/add-appliance')}>
+                        <button className="bg-green-600 hover:bg-green-700 text-white py-2 px-8 rounded-md" onClick={() => navigate('/add-user')}>
                             Add User
                         </button>
                     }

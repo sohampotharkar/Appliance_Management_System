@@ -7,6 +7,9 @@ import "./App.css";
 import GroupDescription from './components/GroupDescription';
 import ApplianceDetails from './components/ApplianceDetails';
 import Addappliance from './components/Addappliance';
+import AddUser from './components/AddUser';
+import YourAppliances from './components/YourAppliances';
+import AddServiceHistory from './components/AddServiceHistory';
 
 function App() {
     return (
@@ -20,6 +23,9 @@ function App() {
                     <Route path='/group-description' element={<GroupDescription />} />
                     <Route path='/appliance-details' element={<ApplianceDetails/>}/>
                     <Route path='/add-appliance' element={<Addappliance/>}/>
+                    <Route path='/add-user' element={<AddUser/>}/>
+                    <Route path='/your-appliances' element={<YourAppliances/>}/>
+                    <Route path='/add-service-history' element={<AddServiceHistory/>}/>
                 </Routes>
             </div>
         </Router>

@@ -3,6 +3,12 @@ const express = require('express');
 const mariadb = require('mariadb');
 const cors = require('cors');
 const app = express();
+const multer = require('multer');
+const fs = require('fs');
+const util = require('util');
+
+// Use promisify to convert readFile into a promise-based function
+
 const port = 5000;
 
 // server.js
@@ -15,6 +21,9 @@ const pool = mariadb.createPool({
 
 app.use(cors());
 app.use(express.json()); // Parse JSON bodies
+const upload = multer();
+const readFileAsync = util.promisify(fs.readFile);
+
 
 // Login route
 app.post('/login', async (req, res) => {
@@ -333,13 +342,145 @@ app.get('/appliance-details', async (req, res) => {
     }
 });
 
+// Route to add user to the group
+app.post('/add-user', async (req, res) => {
+    const { g_id, u_id } = req.body; // Retrieve group ID, user ID, and password from request body
+
+    try {
+        // Verify user with provided user ID and password
+
+        // Add user to the group by inserting into user_group_membership table
+        const connection = await pool.getConnection();
+        const result = await connection.query('INSERT INTO user_group_membership (u_id, g_id) VALUES (?, ?)', [u_id, g_id]);
+        connection.release();
+
+        res.status(200).json({ message: 'User added successfully' });
+    } catch (error) {
+        console.error('Error adding user to group:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
 // app,get('/add-appliance',async (req,res)=>{
 
-// })
+// Route to fetch all users
+app.get('/all-users', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const users = await connection.query('SELECT * FROM user');
+        connection.release();
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching all users:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/add-user', async (req, res) => {
+    const { g_id, u_id } = req.body;
+
+    try {
+        // Check if the user is already a member of the group
+        const connection = await pool.getConnection();
+        const result = await connection.query('SELECT * FROM user_group_membership WHERE u_id = ? AND g_id = ?', [u_id, g_id]);
+        if (result.length > 0) {
+            connection.release();
+            return res.status(400).json({ message: 'User already exists in the group' });
+        }
+
+        // Add the user to the group
+        await connection.query('INSERT INTO user_group_membership (u_id, g_id) VALUES (?, ?)', [u_id, g_id]);
+        connection.release();
+
+        res.status(200).json({ message: 'User added successfully' });
+    } catch (error) {
+        console.error('Error adding user to group:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Route to fetch admin's appliances in a group
+app.get('/admin-appliances', async (req, res) => {
+    const { u_id, password, g_id } = req.query; // Retrieve user ID, password, and group ID from query parameters
+
+    try {
+        // Validate user ID and password
+        const isValidUser = await verifyUser(u_id, password);
+
+        if (!isValidUser) {
+            // If user is not verified, send an error response
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        // Check if the user is an admin of the specified group
+        const isAdmin = await VerifyAdmin(u_id, password, g_id);
+
+        if (!isAdmin) {
+            // If user is not an admin, send an error response
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        // Fetch appliances owned by the admin in the group
+        const connection = await pool.getConnection();
+        const appliances = await connection.query('SELECT * FROM appliance WHERE u_id = ? AND g_id = ?', [u_id, g_id]);
+        connection.release();
+
+        res.json(appliances);
+    } catch (error) {
+        console.error('Error fetching admin appliances:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// server.js
+// Route to add service history
+app.post('/add-service-history', async (req, res) => {
+    const { a_id, service_description,service_date,service_cost, technician_name } = req.body;
+
+    try {
+        // Add service history to the database
+        const connection = await pool.getConnection();
+        await connection.query('INSERT INTO service_history (a_id,service_date,service_description,technician_name,service_cost) VALUES (?, ?,?,?,?)', [a_id,service_date,service_description,technician_name,service_cost]);
+        connection.release();
+
+        res.status(200).json({ message: 'Service history added successfully' });
+    } catch (error) {
+        console.error('Error adding service history:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+
+
+app.post('/add-appliance', upload.single('document'), async (req, res) => {
+    console.log(req.body);
+    const { u_id, g_id, a_name, purchase_date, previous_service_date, warranty_period, cost } = req.body;
+    const invoice_image = req.file;
+
+    console.log(invoice_image);
+
+    try {
+        const connection = await pool.getConnection();
+        //read file data
+        const imageData = req.file.buffer;
+        console.log(imageData);
+        await connection.query('INSERT INTO appliance (g_id, u_id, a_name, purchase_date, previous_service_date, warranty_period, invoice_image,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?)', [g_id, u_id, a_name, purchase_date, previous_service_date, warranty_period, imageData, cost]);
+
+        connection.release();
+        res.status(200).json({ message: 'Appliance added successfully' });
+    } catch (error) {
+        console.error("An error occurred while adding appliance. Please try again", error);
+    }
+});
+
+
 
 
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
+    
 });
 

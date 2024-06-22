@@ -15,6 +15,7 @@ const ApplianceDetails = () => {
     useEffect(() => {
         // Fetch appliance details when the component mounts
         fetchApplianceDetails();
+        
     }, []);
 
     const fetchApplianceDetails = async () => {
@@ -64,6 +65,10 @@ const ApplianceDetails = () => {
         }
     };
 
+    const handleAddServiceHistory = () => {
+        navigate('/add-service-history'); // Redirect to AddServiceHistory component
+    };
+
     return (
         <div className="min-h-screen flex flex-col">
             {/* Top Bar */}
@@ -111,6 +116,10 @@ const ApplianceDetails = () => {
                                 <td className="px-6 py-4 whitespace-nowrap font-semibold">Warranty End Date:</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{applianceData.war_end_date && applianceData.war_end_date.length > 0 && applianceData.war_end_date[0].Warrenty_End_Date ? new Date(applianceData.war_end_date[0].Warrenty_End_Date).toLocaleDateString() : ''} </td>
                             </tr>
+                            <tr>
+                                <td className="px-6 py-4 whitespace-nowrap font-semibold">Previous service date:</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{new Date(applianceData.appliance?.previous_service_date).toLocaleDateString()} </td>
+                            </tr>
                         </tbody>
                     </table>
                     {/* Service History Table */}
@@ -137,6 +146,8 @@ const ApplianceDetails = () => {
                             ))}
                         </tbody>
                     </table>
+                    {/* Add Service History Button */}
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded mt-4" onClick={handleAddServiceHistory}>Add Service History</button>
                 </div>
             </main>
         </div>

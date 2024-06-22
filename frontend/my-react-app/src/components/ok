@@ -25,10 +25,10 @@ const AddAppliance = () => {
         formDataToSend.append('u_id', u_id);
         formDataToSend.append('a_name', applianceName);
         formDataToSend.append('purchase_date', purchaseDate);
-        formDataToSend.append('previous_service_date', previousServiceDate || null);
+        formDataToSend.append('previous_service_date', previousServiceDate);
         formDataToSend.append('warranty_period', warrantyPeriod);
         formDataToSend.append('cost', cost);
-        formDataToSend.append('document', invoiceImage);
+        formDataToSend.append('invoice_image', invoiceImage);
 
         try {
             const response = await axios.post('http://localhost:5000/add-appliance', formDataToSend, {
