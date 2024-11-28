@@ -21,7 +21,7 @@ const GroupDescription = () => {
 
     const fetchGroupDescription = async (g_id,u_id, password) => {
         try {
-            const response = await axios.get('http://localhost:5000/group-description', {
+            const response = await axios.get('http://localhost:5001/group-description', {
                 params: {g_id,u_id,password} // Send group ID as a parameter
             });
             setGroupData(response.data);
@@ -68,7 +68,7 @@ const GroupDescription = () => {
     // If the user confirms deletion, proceed with the deletion logic
     if (confirmDelete) {
         try {
-            const response = await axios.delete('http://localhost:5000/group-description', {
+            const response = await axios.delete('http://localhost:5001/group-description', {
                 params: { g_id, password, u_id } 
             });
             if (response.data.message === 'Removed successfully') {

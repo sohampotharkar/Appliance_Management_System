@@ -1,0 +1,1 @@
+1. The normal user signing up should not be dependent on admin whether he is added in a group or not irrespective of that he should be able to add the add his or her own appliance in the website.

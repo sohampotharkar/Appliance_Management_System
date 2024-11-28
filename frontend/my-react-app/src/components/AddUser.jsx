@@ -17,12 +17,12 @@ const GroupDescription = () => {
                 const u_id = localStorage.getItem('userId');
                 const password = localStorage.getItem('password');
 
-                const groupResponse = await axios.get('http://localhost:5000/group-description', {
+                const groupResponse = await axios.get('http://localhost:5001/group-description', {
                     params: { g_id, u_id, password }
                 });
                 setGroupData(groupResponse.data);
 
-                const usersResponse = await axios.get('http://localhost:5000/all-users');
+                const usersResponse = await axios.get('http://localhost:5001/all-users');
                 setUsers(usersResponse.data);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -47,12 +47,12 @@ const GroupDescription = () => {
     const handleAddUser = async (u_id) => {
         try {
             const token = localStorage.getItem('token'); // Fetch the JWT token from local storage
-            const response = await axios.post('http://localhost:5000/add-user', { g_id, u_id }, {
+            const response = await axios.post('http://localhost:5001/add-user', { g_id, u_id }, {
                 headers: { Authorization: token } // Pass the JWT token in the request headers
             });
             if (response.status === 200) {
                 // User added successfully
-                const usersResponse = await axios.get('http://localhost:5000/all-users', {
+                const usersResponse = await axios.get('http://localhost:5001/all-users', {
                     headers: { Authorization: token } // Pass the JWT token in the request headers
                 });
                 setUsers(usersResponse.data);

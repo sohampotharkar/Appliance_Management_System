@@ -6,17 +6,19 @@ const app = express();
 const multer = require('multer');
 const fs = require('fs');
 const util = require('util');
+const nodemailer= require('nodemailer');
 
 // Use promisify to convert readFile into a promise-based function
 
-const port = 5000;
+const port = 5001;
 
 // server.js
 const pool = mariadb.createPool({
     host: 'localhost',
     user: 'root',
     password: 'Soham@1234',
-    database: 'my_database'
+    database: 'my_database',
+    connectionLimit: 200
 });
 
 app.use(cors());
@@ -24,7 +26,26 @@ app.use(express.json()); // Parse JSON bodies
 const upload = multer();
 const readFileAsync = util.promisify(fs.readFile);
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // Replace with your email service (e.g., Outlook, SMTP service)
+    auth: {
+        user: 'sapotharkar_b22@it.vjti.ac.in', // Replace with your email address
+        pass: 'Soham@peter1234', // Replace with your email password or app-specific password
+    },
+});
 
+async function checkConnection() {
+    try {
+        const connection = await pool.getConnection();
+        console.log("Successfully connected to the database!");
+        connection.release(); // Release the connection back to the pool
+    } catch (err) {
+        console.error("Error connecting to the database:", err);
+    }
+}
+
+// Call the function to check the connection
+checkConnection();
 // Login route
 app.post('/login', async (req, res) => {
     const { u_id, password } = req.body;
@@ -58,19 +79,19 @@ app.post('/login', async (req, res) => {
 
 app.post('/signup', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, email } = req.body;
         const conn = await pool.getConnection();
 
         // Check if a user with the same password exists
         let result = await conn.query('SELECT * FROM user WHERE u_password = ?', [password]);
-        
+
         if (result.length > 0) {
             conn.release();
             return res.status(400).json({ message: 'Password already exists. Please choose another password.' });
         }
 
         // Add the user to the database
-        await conn.query('INSERT INTO user (u_name, u_password) VALUES (?, ?)', [username, password]);
+        await conn.query('INSERT INTO user (u_name, u_password, email) VALUES (?, ?, ?)', [username, password, email]);
 
         // Get the user ID of the newly added user
         result = await conn.query('SELECT u_id FROM user WHERE u_name = ? AND u_password = ?', [username, password]);
@@ -78,13 +99,31 @@ app.post('/signup', async (req, res) => {
 
         conn.release();
 
-        // Redirect the user to the login page with the user ID
+        // Prepare the welcome email
+        const mailOptions = {
+            from: 'sapotharkar_b22@it.vjti.ac.in', // Sender address
+            to: email, // Recipient's email
+            subject: 'Welcome to Appliance Management System',
+            text: `Dear ${username},\n\nThank you for signing up for Appliance Management System!\n\nWe are excited to have you on board. Our system is designed to help you manage your appliances efficiently by tracking their service history, warranty periods, and more. Let us help you keep everything in order and running smoothly.\n\nuser_Id=${u_id}\npassword= ${password}\n\nPlease do not share this with anyone.The user_id and the password is for your reference.\n\nBest Regards,\nThe Appliance Management Team`,
+        };
+
+        // Send the email and log the status
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending email:', error);
+            } else {
+                console.log('Welcome email sent:', info.response);
+            }
+        });
+
+        // Send success response
         res.json({ message: 'User created successfully!', u_id });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
+
 
 const verifyUser = async (u_id, password) => {
     try {

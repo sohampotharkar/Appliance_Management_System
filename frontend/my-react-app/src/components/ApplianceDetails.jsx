@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+
 const ApplianceDetails = () => {
     const [applianceData, setApplianceData] = useState({});
     const [invoiceImage, setInvoiceImage] = useState(null); // State to store invoice image blob
@@ -11,6 +12,10 @@ const ApplianceDetails = () => {
     const selectedApplianceId = localStorage.getItem('selectedApplianceId');
     const u_id = localStorage.getItem('userId');
     const password = localStorage.getItem('password');
+   
+    const handleServicingClick = () => {
+        navigate('/demo-payment'); // Redirect to the demo payment page
+    };
 
     useEffect(() => {
         // Fetch appliance details when the component mounts
@@ -22,7 +27,7 @@ const ApplianceDetails = () => {
         setIsLoading(true); // Set loading state to true
         try {
             // Fetch appliance details using the selected appliance ID
-            const response = await axios.get('http://localhost:5000/appliance-details', {
+            const response = await axios.get('http://localhost:5001/appliance-details', {
                 params: {
                     a_id: selectedApplianceId,
                     u_id: u_id,
@@ -48,6 +53,7 @@ const ApplianceDetails = () => {
         }
     };
 
+    localStorage.setItem('selectedApplianceName',applianceData.appliance?.a_name);
     const handleLogout = () => {
         // Clear local storage data
         localStorage.removeItem('userId');
@@ -55,6 +61,7 @@ const ApplianceDetails = () => {
         localStorage.removeItem('g_id');
         localStorage.removeItem('g_name');
         localStorage.removeItem('selectedApplianceId');
+        localStorage.removeItem('selectedApplianceName');
         // Navigate to login page
         navigate('/login');
     };
@@ -83,6 +90,8 @@ const ApplianceDetails = () => {
                             View Invoice
                         </button>
                     )}
+                     <button className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md mr-4" onClick={handleServicingClick}>Servicing</button>
+
                     <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-8 rounded-md m-4" onClick={handleLogout}>
                         Logout
                     </button>
@@ -114,7 +123,7 @@ const ApplianceDetails = () => {
                             </tr>
                             <tr>
                                 <td className="px-6 py-4 whitespace-nowrap font-semibold">Warranty End Date:</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{applianceData.war_end_date && applianceData.war_end_date.length > 0 && applianceData.war_end_date[0].Warrenty_End_Date ? new Date(applianceData.war_end_date[0].Warrenty_End_Date).toLocaleDateString() : ''} </td>
+                                <td className="px-6 py-4 whitespace-nowrap">{applianceData.war_end_date && applianceData.war_end_date.length > 0 && applianceData.war_end_date[0].Warranty_End_Date ? new Date(applianceData.war_end_date[0].Warranty_End_Date).toLocaleDateString() : ''} </td>
                             </tr>
                             <tr>
                                 <td className="px-6 py-4 whitespace-nowrap font-semibold">Previous service date:</td>

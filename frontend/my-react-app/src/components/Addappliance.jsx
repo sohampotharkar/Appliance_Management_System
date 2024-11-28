@@ -31,7 +31,7 @@ const AddAppliance = () => {
         formDataToSend.append('document', invoiceImage);
 
         try {
-            const response = await axios.post('http://localhost:5000/add-appliance', formDataToSend, {
+            const response = await axios.post('http://localhost:5001/add-appliance', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

@@ -8,6 +8,7 @@ const Signup = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [email,setEmail]=useState('');
 
     const handleSignup = async () => {
         try {
@@ -16,7 +17,7 @@ const Signup = () => {
                 return;
             }
 
-            const response = await axios.post('http://localhost:5000/signup', { username, password });
+            const response = await axios.post('http://localhost:5001/signup', { username, password ,email});
 
             if (response.data.message === 'User created successfully!') {
                 // Show the user ID
@@ -42,6 +43,13 @@ const Signup = () => {
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 mb-4"
+                    />
+                    <input
+                        type='email'
+                        placeholder="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 mb-4"
                     />
                     <input

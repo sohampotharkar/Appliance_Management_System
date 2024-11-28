@@ -13,7 +13,7 @@ const LoginForm = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:5000/login', { u_id, password });
+            const response = await axios.post('http://localhost:5001/login', { u_id, password });
             console.log(response.data); // Handle successful login
             
             // Save user ID and password to local storage

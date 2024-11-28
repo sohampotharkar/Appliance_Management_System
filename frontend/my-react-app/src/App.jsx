@@ -10,6 +10,8 @@ import Addappliance from './components/Addappliance';
 import AddUser from './components/AddUser';
 import YourAppliances from './components/YourAppliances';
 import AddServiceHistory from './components/AddServiceHistory';
+import DemoPaymentPage from './components/demoPayment';
+import FakePaymentPage from './components/FakePaymentPage';
 
 function App() {
     return (
@@ -26,6 +28,8 @@ function App() {
                     <Route path='/add-user' element={<AddUser/>}/>
                     <Route path='/your-appliances' element={<YourAppliances/>}/>
                     <Route path='/add-service-history' element={<AddServiceHistory/>}/>
+                    <Route path='/demo-payment' element={<DemoPaymentPage/>}/>
+                    <Route path='/fake-payment-page' element={<FakePaymentPage/>}/>
                 </Routes>
             </div>
         </Router>

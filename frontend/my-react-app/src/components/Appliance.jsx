@@ -22,7 +22,7 @@ const Appliance = () => {
 
     const fetchUserData = async (u_id, password) => {
         try {
-            const response = await axios.get('http://localhost:5000/user', {
+            const response = await axios.get('http://localhost:5001/user', {
                 params: { u_id, password } // Send user ID and password as parameters
             });
             setUserData(response.data);
@@ -33,7 +33,7 @@ const Appliance = () => {
 
     const fetchAppliances = async (u_id, password, g_id) => {
         try {
-            const response = await axios.get('http://localhost:5000/appliances', {
+            const response = await axios.get('http://localhost:5001/appliances', {
                 params: { u_id, password, g_id } // Send user ID, password, and group ID as parameters
             });
             setAppliances(response.data);
@@ -60,7 +60,7 @@ const Appliance = () => {
     const handleGroupDescription = async () => {
         try {
             // Fetch group details from the backend
-            const response = await axios.get('http://localhost:5000/group-description', {
+            const response = await axios.get('http://localhost:5001/group-description', {
                 params: { g_id }
             });
             const groupData = response.data;
@@ -75,7 +75,7 @@ const Appliance = () => {
     const handleYourAppliances = async () => {
         try {
             // Fetch admin's appliances from the backend
-            const response = await axios.get('http://localhost:5000/admin-appliances', {
+            const response = await axios.get('http://localhost:5001/admin-appliances', {
                 params: { u_id: localStorage.getItem('userId'), password: localStorage.getItem('password'), g_id }
             });
             const adminAppliances = response.data;

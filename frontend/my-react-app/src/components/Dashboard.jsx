@@ -20,7 +20,7 @@ const Dashboard = () => {
 
     const fetchUserData = async (u_id, password) => {
         try {
-            const response = await axios.get('http://localhost:5000/user', {
+            const response = await axios.get('http://localhost:5001/user', {
                 params: { u_id, password } // Send user ID and password as parameters
             });
             setUserData(response.data);
@@ -31,7 +31,7 @@ const Dashboard = () => {
 
     const fetchGroups = async (u_id, password) => {
         try {
-            const response = await axios.get('http://localhost:5000/groups', {
+            const response = await axios.get('http://localhost:5001/groups', {
                 params: { u_id, password } // Send user ID and password as parameters
             });
             setGroups(response.data);

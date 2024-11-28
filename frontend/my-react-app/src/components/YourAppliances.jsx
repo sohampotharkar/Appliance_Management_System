@@ -13,7 +13,7 @@ const YourAppliances = () => {
     const fetchAdminAppliances = async () => {
         try {
             // Fetch admin's appliances from the backend
-            const response = await axios.get('http://localhost:5000/admin-appliances', {
+            const response = await axios.get('http://localhost:5001/admin-appliances', {
                 params: {
                     u_id: localStorage.getItem('userId'),
                     password: localStorage.getItem('password'),
